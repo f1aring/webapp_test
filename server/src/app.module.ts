@@ -6,6 +6,12 @@ import { User } from './entities/user.entity';
 import { Murmur } from './entities/murmur.entity';
 import { MurmursController } from './murmurs/murmurs.controller';
 import { MurmursService } from './murmurs/murmurs.service';
+import { Follow } from './entities/follow.entity';
+import { Like } from './entities/like.entity';
+import { FollowsController } from './follows/follows.controller';
+import { FollowsService } from './follows/follows.service';
+import { LikesService } from './likes/likes.service';
+import { LikesController } from './likes/likes.controller';
 
 @Module({
   imports: [
@@ -16,12 +22,12 @@ import { MurmursService } from './murmurs/murmurs.service';
       username: 'docker',
       password: 'docker',
       database: 'test',
-      entities: [User, Murmur],
+      entities: [User, Murmur, Follow, Like],
       synchronize: true,
     }),
-    TypeOrmModule.forFeature([User, Murmur]),
+    TypeOrmModule.forFeature([User, Murmur, Follow, Like]),
   ],
-  controllers: [AppController, MurmursController],
-  providers: [AppService, MurmursService],
+  controllers: [AppController, MurmursController, FollowsController, LikesController],
+  providers: [AppService, MurmursService, FollowsService, LikesService],
 })
 export class AppModule {}

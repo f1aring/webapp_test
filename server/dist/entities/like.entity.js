@@ -9,25 +9,28 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.JwtStrategy = void 0;
-const common_1 = require("@nestjs/common");
-const passport_1 = require("@nestjs/passport");
-const passport_jwt_1 = require("passport-jwt");
-let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy) {
-    constructor() {
-        super({
-            jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
-            ignoreExpiration: false,
-            secretOrKey: process.env.JWT_SECRET || 'secretKey',
-        });
-    }
-    async validate(payload) {
-        return { id: payload.sub, email: payload.email };
-    }
+exports.Like = void 0;
+const typeorm_1 = require("typeorm");
+let Like = class Like {
 };
-exports.JwtStrategy = JwtStrategy;
-exports.JwtStrategy = JwtStrategy = __decorate([
-    (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [])
-], JwtStrategy);
-//# sourceMappingURL=jwt.strategy.js.map
+exports.Like = Like;
+__decorate([
+    (0, typeorm_1.PrimaryGeneratedColumn)(),
+    __metadata("design:type", Number)
+], Like.prototype, "id", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", Number)
+], Like.prototype, "userId", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", Number)
+], Like.prototype, "murmurId", void 0);
+__decorate([
+    (0, typeorm_1.CreateDateColumn)(),
+    __metadata("design:type", Date)
+], Like.prototype, "createdAt", void 0);
+exports.Like = Like = __decorate([
+    (0, typeorm_1.Entity)()
+], Like);
+//# sourceMappingURL=like.entity.js.map

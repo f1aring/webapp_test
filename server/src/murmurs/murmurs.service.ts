@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { Murmur } from '../entities/murmur.entity';
 import { CreateMurmurDto } from './dto/create-murmur.dto';
 
@@ -13,6 +13,15 @@ export class MurmursService {
 
   findAll(): Promise<Murmur[]> {
     return this.murmurRepo.find({ order: { createdAt: 'DESC' } });
+  }
+
+  findByUser(userId: number): Promise<Murmur[]> {
+    return this.murmurRepo.find({ where: { userId }, order: { createdAt: 'DESC' } });
+  }
+
+  findByUsers(userIds: number[], limit = 100): Promise<Murmur[]> {
+    if (!userIds || userIds.length === 0) return Promise.resolve([]);
+    return this.murmurRepo.find({ where: { userId: In(userIds) }, order: { createdAt: 'DESC' }, take: limit });
   }
 
   async createForUser(userId: number, dto: CreateMurmurDto) {
