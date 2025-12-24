@@ -24,6 +24,14 @@ let MurmursService = class MurmursService {
     findAll() {
         return this.murmurRepo.find({ order: { createdAt: 'DESC' } });
     }
+    findByUser(userId) {
+        return this.murmurRepo.find({ where: { userId }, order: { createdAt: 'DESC' } });
+    }
+    findByUsers(userIds, limit = 100) {
+        if (!userIds || userIds.length === 0)
+            return Promise.resolve([]);
+        return this.murmurRepo.find({ where: { userId: (0, typeorm_2.In)(userIds) }, order: { createdAt: 'DESC' }, take: limit });
+    }
     async createForUser(userId, dto) {
         const murmur = this.murmurRepo.create({ userId, content: dto.content });
         return this.murmurRepo.save(murmur);
