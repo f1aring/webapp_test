@@ -12,6 +12,9 @@ const typeorm_1 = require("@nestjs/typeorm");
 const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
 const user_entity_1 = require("./entities/user.entity");
+const murmur_entity_1 = require("./entities/murmur.entity");
+const murmurs_controller_1 = require("./murmurs/murmurs.controller");
+const murmurs_service_1 = require("./murmurs/murmurs.service");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -25,13 +28,13 @@ exports.AppModule = AppModule = __decorate([
                 username: 'docker',
                 password: 'docker',
                 database: 'test',
-                entities: [user_entity_1.User],
+                entities: [user_entity_1.User, murmur_entity_1.Murmur],
                 synchronize: true,
             }),
-            typeorm_1.TypeOrmModule.forFeature([user_entity_1.User]),
+            typeorm_1.TypeOrmModule.forFeature([user_entity_1.User, murmur_entity_1.Murmur]),
         ],
-        controllers: [app_controller_1.AppController],
-        providers: [app_service_1.AppService],
+        controllers: [app_controller_1.AppController, murmurs_controller_1.MurmursController],
+        providers: [app_service_1.AppService, murmurs_service_1.MurmursService],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map
