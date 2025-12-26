@@ -49,6 +49,13 @@ let MurmursService = class MurmursService {
             isLiked: currentUserId ? userLikes.get(murmur.id)?.has(currentUserId) : false,
         }));
     }
+    async findById(id, currentUserId) {
+        const murmur = await this.murmurRepo.findOne({ where: { id } });
+        if (!murmur)
+            throw new common_1.NotFoundException('Murmur not found');
+        const enriched = await this.enrichMurmurs([murmur], currentUserId);
+        return enriched[0];
+    }
     async findAll(currentUserId) {
         const murmurs = await this.murmurRepo.find({ order: { createdAt: 'DESC' } });
         return this.enrichMurmurs(murmurs, currentUserId);

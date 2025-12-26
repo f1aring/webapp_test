@@ -6,6 +6,7 @@ export declare class MurmursController {
     private readonly followsService;
     constructor(murmursService: MurmursService, followsService: FollowsService);
     getAll(xUserId: string | undefined): Promise<any[]>;
+    getOne(id: number, xUserId: string | undefined): Promise<any>;
     getByUser(id: string, xUserId: string | undefined): Promise<any[]>;
     timeline(xUserId: string | undefined): Promise<any[] | {
         error: string;

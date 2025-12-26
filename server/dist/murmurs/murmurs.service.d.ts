@@ -9,6 +9,7 @@ export declare class MurmursService {
     private readonly likeRepo;
     constructor(murmurRepo: Repository<Murmur>, userRepo: Repository<User>, likeRepo: Repository<Like>);
     private enrichMurmurs;
+    findById(id: number, currentUserId?: number): Promise<any>;
     findAll(currentUserId?: number): Promise<any[]>;
     findByUser(userId: number, currentUserId?: number): Promise<any[]>;
     findByUsers(userIds: number[], currentUserId?: number, limit?: number): Promise<any[]>;

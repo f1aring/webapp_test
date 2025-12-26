@@ -42,6 +42,10 @@ let FollowsService = class FollowsService {
         const rows = await this.followRepo.find({ where: { followerId: userId } });
         return rows.map(r => r.followingId);
     }
+    async isFollowing(followerId, followingId) {
+        const rel = await this.followRepo.findOne({ where: { followerId, followingId } });
+        return !!rel;
+    }
 };
 exports.FollowsService = FollowsService;
 exports.FollowsService = FollowsService = __decorate([

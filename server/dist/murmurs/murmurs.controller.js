@@ -26,6 +26,10 @@ let MurmursController = class MurmursController {
         const currentUserId = xUserId ? Number(xUserId) : undefined;
         return this.murmursService.findAll(currentUserId);
     }
+    getOne(id, xUserId) {
+        const currentUserId = xUserId ? Number(xUserId) : undefined;
+        return this.murmursService.findById(id, currentUserId);
+    }
     getByUser(id, xUserId) {
         const currentUserId = xUserId ? Number(xUserId) : undefined;
         return this.murmursService.findByUser(Number(id), currentUserId);
@@ -61,6 +65,14 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], MurmursController.prototype, "getAll", null);
+__decorate([
+    (0, common_1.Get)('murmurs/:id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Headers)('x-user-id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, String]),
+    __metadata("design:returntype", void 0)
+], MurmursController.prototype, "getOne", null);
 __decorate([
     (0, common_1.Get)('users/:id/murmurs'),
     __param(0, (0, common_1.Param)('id')),

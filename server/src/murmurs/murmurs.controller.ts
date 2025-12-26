@@ -16,6 +16,12 @@ export class MurmursController {
     return this.murmursService.findAll(currentUserId);
   }
 
+  @Get('murmurs/:id')
+  getOne(@Param('id', ParseIntPipe) id: number, @Headers('x-user-id') xUserId: string | undefined) {
+    const currentUserId = xUserId ? Number(xUserId) : undefined;
+    return this.murmursService.findById(id, currentUserId);
+  }
+
   @Get('users/:id/murmurs')
   getByUser(@Param('id') id: string, @Headers('x-user-id') xUserId: string | undefined) {
     const currentUserId = xUserId ? Number(xUserId) : undefined;

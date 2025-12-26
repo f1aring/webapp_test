@@ -30,4 +30,9 @@ export class FollowsService {
     const rows = await this.followRepo.find({ where: { followerId: userId } });
     return rows.map(r => r.followingId);
   }
+
+  async isFollowing(followerId: number, followingId: number): Promise<boolean> {
+    const rel = await this.followRepo.findOne({ where: { followerId, followingId } });
+    return !!rel;
+  }
 }

@@ -46,6 +46,13 @@ export class MurmursService {
     }));
   }
 
+  async findById(id: number, currentUserId?: number): Promise<any> {
+    const murmur = await this.murmurRepo.findOne({ where: { id } });
+    if (!murmur) throw new NotFoundException('Murmur not found');
+    const enriched = await this.enrichMurmurs([murmur], currentUserId);
+    return enriched[0];
+  }
+
   async findAll(currentUserId?: number): Promise<any[]> {
     const murmurs = await this.murmurRepo.find({ order: { createdAt: 'DESC' } });
     return this.enrichMurmurs(murmurs, currentUserId);

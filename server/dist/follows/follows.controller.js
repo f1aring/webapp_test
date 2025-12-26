@@ -19,6 +19,12 @@ let FollowsController = class FollowsController {
     constructor(followsService) {
         this.followsService = followsService;
     }
+    checkFollow(xUserId, id) {
+        const userId = xUserId ? Number(xUserId) : undefined;
+        if (!userId)
+            return { error: 'Missing x-user-id header' };
+        return this.followsService.isFollowing(userId, Number(id));
+    }
     follow(xUserId, id) {
         const userId = xUserId ? Number(xUserId) : undefined;
         if (!userId)
@@ -33,6 +39,14 @@ let FollowsController = class FollowsController {
     }
 };
 exports.FollowsController = FollowsController;
+__decorate([
+    (0, common_1.Get)('me/follow/:id'),
+    __param(0, (0, common_1.Headers)('x-user-id')),
+    __param(1, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], FollowsController.prototype, "checkFollow", null);
 __decorate([
     (0, common_1.Post)('me/follow/:id'),
     __param(0, (0, common_1.Headers)('x-user-id')),

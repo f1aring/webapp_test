@@ -17,21 +17,34 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const user_entity_1 = require("../entities/user.entity");
+const follow_entity_1 = require("../entities/follow.entity");
 let UsersService = class UsersService {
-    constructor(userRepo) {
+    constructor(userRepo, followRepo) {
         this.userRepo = userRepo;
+        this.followRepo = followRepo;
     }
-    findAll() {
+    async findAll() {
         return this.userRepo.find();
     }
-    findById(id) {
-        return this.userRepo.findOne({ where: { id } });
+    async findById(id) {
+        const user = await this.userRepo.findOne({ where: { id } });
+        if (!user)
+            return null;
+        const followCount = await this.followRepo.count({ where: { followerId: id } });
+        const followedCount = await this.followRepo.count({ where: { followingId: id } });
+        return {
+            ...user,
+            followCount,
+            followedCount,
+        };
     }
 };
 exports.UsersService = UsersService;
 exports.UsersService = UsersService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __param(1, (0, typeorm_1.InjectRepository)(follow_entity_1.Follow)),
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository])
 ], UsersService);
 //# sourceMappingURL=users.service.js.map
