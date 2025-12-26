@@ -17,24 +17,60 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const murmur_entity_1 = require("../entities/murmur.entity");
+const user_entity_1 = require("../entities/user.entity");
+const like_entity_1 = require("../entities/like.entity");
 let MurmursService = class MurmursService {
-    constructor(murmurRepo) {
+    constructor(murmurRepo, userRepo, likeRepo) {
         this.murmurRepo = murmurRepo;
+        this.userRepo = userRepo;
+        this.likeRepo = likeRepo;
     }
-    findAll() {
-        return this.murmurRepo.find({ order: { createdAt: 'DESC' } });
+    async enrichMurmurs(murmurs, currentUserId) {
+        const userIds = [...new Set(murmurs.map(m => m.userId))];
+        const users = await this.userRepo.find({ where: { id: (0, typeorm_2.In)(userIds) } });
+        const userMap = new Map(users.map(u => [u.id, u]));
+        const murmurIds = murmurs.map(m => m.id);
+        const likes = murmurIds.length > 0
+            ? await this.likeRepo.find({ where: { murmurId: (0, typeorm_2.In)(murmurIds) } })
+            : [];
+        const likeCounts = new Map();
+        const userLikes = new Map();
+        likes.forEach(like => {
+            likeCounts.set(like.murmurId, (likeCounts.get(like.murmurId) || 0) + 1);
+            if (!userLikes.has(like.murmurId)) {
+                userLikes.set(like.murmurId, new Set());
+            }
+            userLikes.get(like.murmurId).add(like.userId);
+        });
+        return murmurs.map(murmur => ({
+            ...murmur,
+            user: userMap.get(murmur.userId),
+            likeCount: likeCounts.get(murmur.id) || 0,
+            isLiked: currentUserId ? userLikes.get(murmur.id)?.has(currentUserId) : false,
+        }));
     }
-    findByUser(userId) {
-        return this.murmurRepo.find({ where: { userId }, order: { createdAt: 'DESC' } });
+    async findAll(currentUserId) {
+        const murmurs = await this.murmurRepo.find({ order: { createdAt: 'DESC' } });
+        return this.enrichMurmurs(murmurs, currentUserId);
     }
-    findByUsers(userIds, limit = 100) {
+    async findByUser(userId, currentUserId) {
+        const murmurs = await this.murmurRepo.find({ where: { userId }, order: { createdAt: 'DESC' } });
+        return this.enrichMurmurs(murmurs, currentUserId);
+    }
+    async findByUsers(userIds, currentUserId, limit = 100) {
         if (!userIds || userIds.length === 0)
             return Promise.resolve([]);
-        return this.murmurRepo.find({ where: { userId: (0, typeorm_2.In)(userIds) }, order: { createdAt: 'DESC' }, take: limit });
+        const murmurs = await this.murmurRepo.find({
+            where: { userId: (0, typeorm_2.In)(userIds) },
+            order: { createdAt: 'DESC' },
+            take: limit
+        });
+        return this.enrichMurmurs(murmurs, currentUserId);
     }
     async createForUser(userId, dto) {
         const murmur = this.murmurRepo.create({ userId, content: dto.content });
-        return this.murmurRepo.save(murmur);
+        const saved = await this.murmurRepo.save(murmur);
+        return this.enrichMurmurs([saved], userId).then(arr => arr[0]);
     }
     async deleteForUser(userId, id) {
         const murmur = await this.murmurRepo.findOne({ where: { id } });
@@ -50,6 +86,10 @@ exports.MurmursService = MurmursService;
 exports.MurmursService = MurmursService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(murmur_entity_1.Murmur)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __param(1, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
+    __param(2, (0, typeorm_1.InjectRepository)(like_entity_1.Like)),
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
+        typeorm_2.Repository])
 ], MurmursService);
 //# sourceMappingURL=murmurs.service.js.map

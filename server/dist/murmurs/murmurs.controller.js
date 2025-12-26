@@ -16,12 +16,27 @@ exports.MurmursController = void 0;
 const common_1 = require("@nestjs/common");
 const murmurs_service_1 = require("./murmurs.service");
 const create_murmur_dto_1 = require("./dto/create-murmur.dto");
+const follows_service_1 = require("../follows/follows.service");
 let MurmursController = class MurmursController {
-    constructor(murmursService) {
+    constructor(murmursService, followsService) {
         this.murmursService = murmursService;
+        this.followsService = followsService;
     }
-    getAll() {
-        return this.murmursService.findAll();
+    getAll(xUserId) {
+        const currentUserId = xUserId ? Number(xUserId) : undefined;
+        return this.murmursService.findAll(currentUserId);
+    }
+    getByUser(id, xUserId) {
+        const currentUserId = xUserId ? Number(xUserId) : undefined;
+        return this.murmursService.findByUser(Number(id), currentUserId);
+    }
+    async timeline(xUserId) {
+        const userId = xUserId ? Number(xUserId) : undefined;
+        if (!userId)
+            return { error: 'Missing x-user-id header' };
+        const following = await this.followsService.getFollowingIds(userId);
+        const ids = [userId, ...following];
+        return this.murmursService.findByUsers(ids, userId);
     }
     createForMe(xUserId, body) {
         const userId = xUserId ? Number(xUserId) : body.userId;
@@ -41,10 +56,26 @@ let MurmursController = class MurmursController {
 exports.MurmursController = MurmursController;
 __decorate([
     (0, common_1.Get)('murmurs'),
+    __param(0, (0, common_1.Headers)('x-user-id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], MurmursController.prototype, "getAll", null);
+__decorate([
+    (0, common_1.Get)('users/:id/murmurs'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Headers)('x-user-id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], MurmursController.prototype, "getByUser", null);
+__decorate([
+    (0, common_1.Get)('me/timeline'),
+    __param(0, (0, common_1.Headers)('x-user-id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], MurmursController.prototype, "timeline", null);
 __decorate([
     (0, common_1.Post)('me/murmurs'),
     __param(0, (0, common_1.Headers)('x-user-id')),
@@ -63,6 +94,7 @@ __decorate([
 ], MurmursController.prototype, "deleteForMe", null);
 exports.MurmursController = MurmursController = __decorate([
     (0, common_1.Controller)('api'),
-    __metadata("design:paramtypes", [murmurs_service_1.MurmursService])
+    __metadata("design:paramtypes", [murmurs_service_1.MurmursService,
+        follows_service_1.FollowsService])
 ], MurmursController);
 //# sourceMappingURL=murmurs.controller.js.map
