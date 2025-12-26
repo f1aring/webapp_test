@@ -116,9 +116,6 @@ export default function Profile({ currentUserId }: ProfileProps) {
             <h1 style={{ fontSize: '24px', marginBottom: '8px', fontWeight: 'bold' }}>
               {user.name || user.email}
             </h1>
-            <p style={{ color: '#657786', fontSize: '15px', marginBottom: '12px' }}>
-              @user{user.id}
-            </p>
             <div style={{ display: 'flex', gap: '24px', marginTop: '12px' }}>
               <div>
                 <span style={{ fontWeight: 'bold', fontSize: '16px' }}>{murmurs.length}</span>

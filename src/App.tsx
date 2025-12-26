@@ -8,6 +8,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import { User } from './types';
 import './index.css';
+import TopBar from './components/TopBar';
 
 function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -47,55 +48,52 @@ function App() {
 
   return (
     <BrowserRouter>
-      <div style={{ 
-        display: 'flex', 
+      <div style={{
+        display: 'flex',
         minHeight: '100vh',
         backgroundColor: '#f7f9fa',
+        flexDirection: 'column'
       }}>
-        <nav style={{ 
-          minWidth: 220, 
+        <TopBar currentUser={currentUser} onLogout={handleLogout} />
+
+        <div style={{ display: 'flex', flex: 1 }}>
+        <nav style={{
+          minWidth: 220,
           backgroundColor: 'white',
           borderRight: '1px solid #e1e8ed',
           padding: '20px',
         }}>
-          <h2 style={{ 
-            fontSize: '20px', 
-            marginBottom: '24px',
-            fontWeight: 'bold',
-            color: '#1da1f2',
-          }}>
-            MiniMurmur
-          </h2>
-          
-          <div style={{ marginBottom: '24px' }}>
-            <Link 
-              to="/" 
-              style={{
-                display: 'block',
-                padding: '12px',
-                borderRadius: '8px',
-                textDecoration: 'none',
-                color: '#14171a',
-                fontWeight: 'bold',
-                marginBottom: '8px',
-              }}
-            >
-              Timeline
-            </Link>
-            <Link 
-              to="/global" 
-              style={{
-                display: 'block',
-                padding: '12px',
-                borderRadius: '8px',
-                textDecoration: 'none',
-                color: '#14171a',
-                fontWeight: 'bold',
-              }}
-            >
-              Global
-            </Link>
-          </div>
+          {currentUser && (
+            <div style={{ marginBottom: '24px' }}>
+              <Link 
+                to="/" 
+                style={{
+                  display: 'block',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  textDecoration: 'none',
+                  color: '#14171a',
+                  fontWeight: 'bold',
+                  marginBottom: '8px',
+                }}
+              >
+                Timeline
+              </Link>
+              <Link 
+                to="/global" 
+                style={{
+                  display: 'block',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  textDecoration: 'none',
+                  color: '#14171a',
+                  fontWeight: 'bold',
+                }}
+              >
+                Global
+              </Link>
+            </div>
+          )}
 
           <div style={{ marginBottom: '24px' }}>
             <h4 style={{ 
@@ -125,108 +123,10 @@ function App() {
               </div>
             ))}
           </div>
-
-          {currentUser ? (
-            <div style={{ 
-              marginTop: '24px',
-              padding: '16px',
-              backgroundColor: '#f7f9fa',
-              borderRadius: '8px',
-            }}>
-              <div style={{ marginBottom: '12px' }}>
-                <p style={{ 
-                  fontSize: '14px',
-                  fontWeight: 'bold',
-                  color: '#14171a',
-                  marginBottom: '4px',
-                }}>
-                  {currentUser.name || currentUser.email}
-                </p>
-                <p style={{ 
-                  fontSize: '12px',
-                  color: '#657786',
-                }}>
-                  @user{currentUser.id}
-                </p>
-              </div>
-              <Link
-                to={`/users/${currentUser.id}`}
-                style={{
-                  display: 'block',
-                  padding: '8px',
-                  borderRadius: '4px',
-                  textDecoration: 'none',
-                  color: '#1da1f2',
-                  fontSize: '14px',
-                  marginBottom: '8px',
-                  textAlign: 'center',
-                }}
-              >
-                My Profile
-              </Link>
-              <button
-                onClick={handleLogout}
-                style={{
-                  width: '100%',
-                  padding: '8px',
-                  border: '1px solid #e1e8ed',
-                  borderRadius: '4px',
-                  backgroundColor: 'white',
-                  color: '#e0245e',
-                  fontSize: '14px',
-                  cursor: 'pointer',
-                }}
-              >
-                Logout
-              </button>
-            </div>
-          ) : (
-            <div style={{ 
-              marginTop: '24px',
-              padding: '16px',
-              backgroundColor: '#f7f9fa',
-              borderRadius: '8px',
-            }}>
-              <Link
-                to="/login"
-                style={{
-                  display: 'block',
-                  padding: '10px',
-                  borderRadius: '4px',
-                  textDecoration: 'none',
-                  backgroundColor: '#1da1f2',
-                  color: 'white',
-                  fontSize: '14px',
-                  fontWeight: 'bold',
-                  textAlign: 'center',
-                  marginBottom: '8px',
-                }}
-              >
-                Sign In
-              </Link>
-              <Link
-                to="/signup"
-                style={{
-                  display: 'block',
-                  padding: '10px',
-                  borderRadius: '4px',
-                  textDecoration: 'none',
-                  border: '1px solid #1da1f2',
-                  color: '#1da1f2',
-                  fontSize: '14px',
-                  fontWeight: 'bold',
-                  textAlign: 'center',
-                  backgroundColor: 'white',
-                }}
-              >
-                Sign Up
-              </Link>
-            </div>
-          )}
         </nav>
 
-        <main style={{ 
-          flex: 1, 
+        <main style={{
+          flex: 1,
           padding: '20px',
           maxWidth: '600px',
           margin: '0 auto',
@@ -247,6 +147,7 @@ function App() {
           )}
         </main>
       </div>
+    </div>
     </BrowserRouter>
   );
 }
