@@ -21,6 +21,8 @@ const follows_controller_1 = require("./follows/follows.controller");
 const follows_service_1 = require("./follows/follows.service");
 const likes_service_1 = require("./likes/likes.service");
 const likes_controller_1 = require("./likes/likes.controller");
+const users_controller_1 = require("./users/users.controller");
+const users_service_1 = require("./users/users.service");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -39,8 +41,8 @@ exports.AppModule = AppModule = __decorate([
             }),
             typeorm_1.TypeOrmModule.forFeature([user_entity_1.User, murmur_entity_1.Murmur, follow_entity_1.Follow, like_entity_1.Like]),
         ],
-        controllers: [app_controller_1.AppController, murmurs_controller_1.MurmursController, follows_controller_1.FollowsController, likes_controller_1.LikesController],
-        providers: [app_service_1.AppService, murmurs_service_1.MurmursService, follows_service_1.FollowsService, likes_service_1.LikesService],
+        controllers: [app_controller_1.AppController, murmurs_controller_1.MurmursController, follows_controller_1.FollowsController, likes_controller_1.LikesController, users_controller_1.UsersController],
+        providers: [app_service_1.AppService, murmurs_service_1.MurmursService, follows_service_1.FollowsService, likes_service_1.LikesService, users_service_1.UsersService],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map
