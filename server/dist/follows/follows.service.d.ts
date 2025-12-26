@@ -14,4 +14,5 @@ export declare class FollowsService {
         success: boolean;
     }>;
     getFollowingIds(userId: number): Promise<number[]>;
+    isFollowing(followerId: number, followingId: number): Promise<boolean>;
 }

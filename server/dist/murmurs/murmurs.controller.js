@@ -16,53 +16,103 @@ exports.MurmursController = void 0;
 const common_1 = require("@nestjs/common");
 const murmurs_service_1 = require("./murmurs.service");
 const create_murmur_dto_1 = require("./dto/create-murmur.dto");
+const follows_service_1 = require("../follows/follows.service");
+const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 let MurmursController = class MurmursController {
-    constructor(murmursService) {
+    constructor(murmursService, followsService) {
         this.murmursService = murmursService;
+        this.followsService = followsService;
     }
-    getAll() {
-        return this.murmursService.findAll();
+    getUserId(req, xUserId) {
+        if (req?.user?.id)
+            return req.user.id;
+        if (xUserId)
+            return Number(xUserId);
+        return undefined;
     }
-    createForMe(xUserId, body) {
-        const userId = xUserId ? Number(xUserId) : body.userId;
-        if (!userId) {
-            return { error: 'Missing x-user-id header or body.userId' };
-        }
+    getAll(req, xUserId) {
+        const currentUserId = this.getUserId(req, xUserId);
+        return this.murmursService.findAll(currentUserId);
+    }
+    getOne(id, req, xUserId) {
+        const currentUserId = this.getUserId(req, xUserId);
+        return this.murmursService.findById(id, currentUserId);
+    }
+    getByUser(id, req, xUserId) {
+        const currentUserId = this.getUserId(req, xUserId);
+        return this.murmursService.findByUser(Number(id), currentUserId);
+    }
+    async timeline(req) {
+        const userId = req.user.id;
+        const following = await this.followsService.getFollowingIds(userId);
+        const ids = [userId, ...following];
+        return this.murmursService.findByUsers(ids, userId);
+    }
+    createForMe(req, body) {
+        const userId = req.user.id;
         return this.murmursService.createForUser(userId, body);
     }
-    deleteForMe(xUserId, id) {
-        const userId = xUserId ? Number(xUserId) : undefined;
-        if (!userId) {
-            return { error: 'Missing x-user-id header' };
-        }
+    deleteForMe(req, id) {
+        const userId = req.user.id;
         return this.murmursService.deleteForUser(userId, id);
     }
 };
 exports.MurmursController = MurmursController;
 __decorate([
     (0, common_1.Get)('murmurs'),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Headers)('x-user-id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], MurmursController.prototype, "getAll", null);
 __decorate([
+    (0, common_1.Get)('murmurs/:id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Request)()),
+    __param(2, (0, common_1.Headers)('x-user-id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object, String]),
+    __metadata("design:returntype", void 0)
+], MurmursController.prototype, "getOne", null);
+__decorate([
+    (0, common_1.Get)('users/:id/murmurs'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Request)()),
+    __param(2, (0, common_1.Headers)('x-user-id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object, String]),
+    __metadata("design:returntype", void 0)
+], MurmursController.prototype, "getByUser", null);
+__decorate([
+    (0, common_1.Get)('me/timeline'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __param(0, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], MurmursController.prototype, "timeline", null);
+__decorate([
     (0, common_1.Post)('me/murmurs'),
-    __param(0, (0, common_1.Headers)('x-user-id')),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, create_murmur_dto_1.CreateMurmurDto]),
+    __metadata("design:paramtypes", [Object, create_murmur_dto_1.CreateMurmurDto]),
     __metadata("design:returntype", void 0)
 ], MurmursController.prototype, "createForMe", null);
 __decorate([
     (0, common_1.Delete)('me/murmurs/:id'),
-    __param(0, (0, common_1.Headers)('x-user-id')),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Number]),
+    __metadata("design:paramtypes", [Object, Number]),
     __metadata("design:returntype", void 0)
 ], MurmursController.prototype, "deleteForMe", null);
 exports.MurmursController = MurmursController = __decorate([
     (0, common_1.Controller)('api'),
-    __metadata("design:paramtypes", [murmurs_service_1.MurmursService])
+    __metadata("design:paramtypes", [murmurs_service_1.MurmursService,
+        follows_service_1.FollowsService])
 ], MurmursController);
 //# sourceMappingURL=murmurs.controller.js.map

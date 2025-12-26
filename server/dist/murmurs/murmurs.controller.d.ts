@@ -1,15 +1,17 @@
 import { MurmursService } from './murmurs.service';
 import { CreateMurmurDto } from './dto/create-murmur.dto';
+import { FollowsService } from '../follows/follows.service';
 export declare class MurmursController {
     private readonly murmursService;
-    constructor(murmursService: MurmursService);
-    getAll(): Promise<import("../entities/murmur.entity").Murmur[]>;
-    createForMe(xUserId: string | undefined, body: CreateMurmurDto): Promise<import("../entities/murmur.entity").Murmur> | {
-        error: string;
-    };
-    deleteForMe(xUserId: string | undefined, id: number): Promise<{
+    private readonly followsService;
+    constructor(murmursService: MurmursService, followsService: FollowsService);
+    private getUserId;
+    getAll(req: any, xUserId: string | undefined): Promise<any[]>;
+    getOne(id: number, req: any, xUserId: string | undefined): Promise<any>;
+    getByUser(id: string, req: any, xUserId: string | undefined): Promise<any[]>;
+    timeline(req: any): Promise<any[]>;
+    createForMe(req: any, body: CreateMurmurDto): Promise<any>;
+    deleteForMe(req: any, id: number): Promise<{
         success: boolean;
-    }> | {
-        error: string;
-    };
+    }>;
 }

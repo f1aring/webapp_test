@@ -15,38 +15,37 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.LikesController = void 0;
 const common_1 = require("@nestjs/common");
 const likes_service_1 = require("./likes.service");
+const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 let LikesController = class LikesController {
     constructor(likesService) {
         this.likesService = likesService;
     }
-    like(xUserId, id) {
-        const userId = xUserId ? Number(xUserId) : undefined;
-        if (!userId)
-            return { error: 'Missing x-user-id header' };
+    like(req, id) {
+        const userId = req.user.id;
         return this.likesService.like(userId, Number(id));
     }
-    unlike(xUserId, id) {
-        const userId = xUserId ? Number(xUserId) : undefined;
-        if (!userId)
-            return { error: 'Missing x-user-id header' };
+    unlike(req, id) {
+        const userId = req.user.id;
         return this.likesService.unlike(userId, Number(id));
     }
 };
 exports.LikesController = LikesController;
 __decorate([
     (0, common_1.Post)('murmurs/:id/like'),
-    __param(0, (0, common_1.Headers)('x-user-id')),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], LikesController.prototype, "like", null);
 __decorate([
     (0, common_1.Delete)('murmurs/:id/like'),
-    __param(0, (0, common_1.Headers)('x-user-id')),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], LikesController.prototype, "unlike", null);
 exports.LikesController = LikesController = __decorate([
