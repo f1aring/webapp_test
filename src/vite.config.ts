@@ -9,7 +9,13 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:3001',
         changeOrigin: true,
-        secure: false
+        secure: false,
+        bypass(req) {
+          // Don't proxy requests for TypeScript/JavaScript files
+          if (req.url && /\.(tsx?|jsx?|json)$/.test(req.url)) {
+            return req.url;
+          }
+        }
       }
     }
   }
