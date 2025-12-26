@@ -8,8 +8,11 @@ interface TimelineProps {
   global?: boolean;
 }
 
+const MURMURS_PER_PAGE = 10;
+
 export default function Timeline({ currentUserId, global = false }: TimelineProps) {
-  const [murmurs, setMurmurs] = useState<(Murmur & { user?: User; likeCount?: number; isLiked?: boolean })[]>([]);
+  const [allMurmurs, setAllMurmurs] = useState<(Murmur & { user?: User; likeCount?: number; isLiked?: boolean })[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [newMurmur, setNewMurmur] = useState('');
   const [isPosting, setIsPosting] = useState(false);
@@ -22,16 +25,17 @@ export default function Timeline({ currentUserId, global = false }: TimelineProp
         data = await getMurmurs();
       } else {
         if (!currentUserId) {
-          setMurmurs([]);
+          setAllMurmurs([]);
           setLoading(false);
           return;
         }
         data = await getTimeline();
       }
-      setMurmurs(data || []);
+      setAllMurmurs(data || []);
+      setCurrentPage(1); // Reset to first page when loading new data
     } catch (error) {
       console.error('Error loading murmurs:', error);
-      setMurmurs([]);
+      setAllMurmurs([]);
     } finally {
       setLoading(false);
     }
@@ -137,11 +141,55 @@ export default function Timeline({ currentUserId, global = false }: TimelineProp
       )}
 
       <MurmurList
-        murmurs={murmurs}
+        murmurs={allMurmurs.slice((currentPage - 1) * MURMURS_PER_PAGE, currentPage * MURMURS_PER_PAGE)}
         currentUserId={currentUserId}
         onDelete={handleDelete}
         onLikeChange={loadMurmurs}
       />
+
+      {allMurmurs.length > MURMURS_PER_PAGE && (
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '12px',
+          marginTop: '20px',
+        }}>
+          <button
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+            style={{
+              padding: '8px 16px',
+              border: '1px solid #e1e8ed',
+              borderRadius: '4px',
+              backgroundColor: currentPage === 1 ? '#f7f9fa' : 'white',
+              color: currentPage === 1 ? '#657786' : '#14171a',
+              cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+              fontSize: '14px',
+            }}
+          >
+            Previous
+          </button>
+          <span style={{ color: '#657786', fontSize: '14px' }}>
+            Page {currentPage} of {Math.ceil(allMurmurs.length / MURMURS_PER_PAGE)}
+          </span>
+          <button
+            onClick={() => setCurrentPage(prev => Math.min(Math.ceil(allMurmurs.length / MURMURS_PER_PAGE), prev + 1))}
+            disabled={currentPage >= Math.ceil(allMurmurs.length / MURMURS_PER_PAGE)}
+            style={{
+              padding: '8px 16px',
+              border: '1px solid #e1e8ed',
+              borderRadius: '4px',
+              backgroundColor: currentPage >= Math.ceil(allMurmurs.length / MURMURS_PER_PAGE) ? '#f7f9fa' : 'white',
+              color: currentPage >= Math.ceil(allMurmurs.length / MURMURS_PER_PAGE) ? '#657786' : '#14171a',
+              cursor: currentPage >= Math.ceil(allMurmurs.length / MURMURS_PER_PAGE) ? 'not-allowed' : 'pointer',
+              fontSize: '14px',
+            }}
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 }

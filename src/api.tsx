@@ -22,6 +22,10 @@ export async function getMurmurs() {
   return api.get('/murmurs').then(r => r.data);
 }
 
+export async function getMurmur(id: number) {
+  return api.get(`/murmurs/${id}`).then(r => r.data);
+}
+
 export async function getUserMurmurs(userId: number) {
   return api.get(`/users/${userId}/murmurs`).then(r => r.data);
 }
@@ -36,6 +40,10 @@ export async function createMurmur(content: string) {
 
 export async function deleteMurmur(id: number) {
   return api.delete(`/me/murmurs/${id}`).then(r => r.data);
+}
+
+export async function checkFollowStatus(id: number) {
+  return api.get(`/me/follow/${id}`).then(r => r.data);
 }
 
 export async function followUser(id: number) {

@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import { setUserId, getUsers } from './api';
 import Timeline from './pages/Timeline';
 import Profile from './pages/Profile';
+import MurmurDetail from './pages/MurmurDetail';
 import { User } from './types';
 import './index.css';
 
@@ -165,6 +166,7 @@ function App() {
             <Route path="/" element={<Timeline currentUserId={userId} />} />
             <Route path="/global" element={<Timeline currentUserId={userId} global />} />
             <Route path="/users/:id" element={<Profile currentUserId={userId} />} />
+            <Route path="/murmurs/:id" element={<MurmurDetail currentUserId={userId} />} />
           </Routes>
         </main>
       </div>

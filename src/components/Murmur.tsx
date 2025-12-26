@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { deleteMurmur, likeMurmur, unlikeMurmur } from '../api';
 import { User } from '../types';
 
@@ -20,6 +21,7 @@ interface MurmurProps {
 }
 
 export default function MurmurComponent({ murmur, currentUserId, onDelete, onLikeChange }: MurmurProps) {
+  const navigate = useNavigate();
   const [isLiked, setIsLiked] = useState(murmur.isLiked || false);
   const [likeCount, setLikeCount] = useState(murmur.likeCount || 0);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -80,7 +82,16 @@ export default function MurmurComponent({ murmur, currentUserId, onDelete, onLik
       padding: '16px',
       marginBottom: '12px',
       backgroundColor: 'white',
-    }}>
+      cursor: 'pointer',
+    }}
+    onClick={() => navigate(`/murmurs/${murmur.id}`)}
+    onMouseEnter={(e) => {
+      e.currentTarget.style.backgroundColor = '#f7f9fa';
+    }}
+    onMouseLeave={(e) => {
+      e.currentTarget.style.backgroundColor = 'white';
+    }}
+    >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
@@ -97,7 +108,7 @@ export default function MurmurComponent({ murmur, currentUserId, onDelete, onLik
           <p style={{ margin: '8px 0', fontSize: '15px', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>
             {murmur.content}
           </p>
-          <div style={{ display: 'flex', gap: '24px', marginTop: '12px' }}>
+          <div style={{ display: 'flex', gap: '24px', marginTop: '12px' }} onClick={(e) => e.stopPropagation()}>
             <button
               onClick={handleLike}
               disabled={!currentUserId}

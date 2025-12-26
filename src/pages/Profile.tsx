@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { getUser, getUserMurmurs, followUser, unfollowUser, getUsers } from '../api';
+import { getUser, getUserMurmurs, followUser, unfollowUser, checkFollowStatus } from '../api';
 import MurmurList from '../components/MurmurList';
 import { User, Murmur } from '../types';
 
@@ -8,10 +8,15 @@ interface ProfileProps {
   currentUserId?: number;
 }
 
+interface UserWithStats extends User {
+  followCount?: number;
+  followedCount?: number;
+}
+
 export default function Profile({ currentUserId }: ProfileProps) {
   const { id } = useParams<{ id: string }>();
   const userId = id ? Number(id) : undefined;
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserWithStats | null>(null);
   const [murmurs, setMurmurs] = useState<(Murmur & { user?: User; likeCount?: number; isLiked?: boolean })[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
@@ -33,12 +38,11 @@ export default function Profile({ currentUserId }: ProfileProps) {
         // Check if current user is following this user
         if (currentUserId && currentUserId !== userId) {
           try {
-            const users = await getUsers();
-            // This is a simple check - in a real app, you'd have a dedicated endpoint
-            // For now, we'll try to follow/unfollow and see if it works
-            setIsFollowing(false); // We'll update this when user tries to follow
+            const isFollowingStatus = await checkFollowStatus(userId);
+            setIsFollowing(isFollowingStatus);
           } catch (error) {
             console.error('Error checking follow status:', error);
+            setIsFollowing(false);
           }
         }
       } catch (error) {
@@ -62,6 +66,11 @@ export default function Profile({ currentUserId }: ProfileProps) {
       } else {
         await followUser(userId);
         setIsFollowing(true);
+      }
+      // Reload user data to update follow counts
+      if (userId) {
+        const userData = await getUser(userId);
+        setUser(userData);
       }
     } catch (error) {
       console.error('Error toggling follow:', error);
@@ -110,9 +119,22 @@ export default function Profile({ currentUserId }: ProfileProps) {
             <p style={{ color: '#657786', fontSize: '15px', marginBottom: '12px' }}>
               @user{user.id}
             </p>
-            <p style={{ color: '#657786', fontSize: '14px' }}>
-              {murmurs.length} {murmurs.length === 1 ? 'murmur' : 'murmurs'}
-            </p>
+            <div style={{ display: 'flex', gap: '24px', marginTop: '12px' }}>
+              <div>
+                <span style={{ fontWeight: 'bold', fontSize: '16px' }}>{murmurs.length}</span>
+                <span style={{ color: '#657786', fontSize: '14px', marginLeft: '4px' }}>
+                  {murmurs.length === 1 ? 'murmur' : 'murmurs'}
+                </span>
+              </div>
+              <div>
+                <span style={{ fontWeight: 'bold', fontSize: '16px' }}>{user.followCount || 0}</span>
+                <span style={{ color: '#657786', fontSize: '14px', marginLeft: '4px' }}>Following</span>
+              </div>
+              <div>
+                <span style={{ fontWeight: 'bold', fontSize: '16px' }}>{user.followedCount || 0}</span>
+                <span style={{ color: '#657786', fontSize: '14px', marginLeft: '4px' }}>Followers</span>
+              </div>
+            </div>
           </div>
           {currentUserId && !isOwnProfile && (
             <button
