@@ -1,36 +1,25 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Like } from '../entities/like.entity';
+import { LikeRepository } from '../repositories/like.repository';
 
 @Injectable()
 export class LikesService {
-  constructor(
-    @InjectRepository(Like)
-    private readonly likeRepo: Repository<Like>,
-  ) {}
+  constructor(private readonly likeRepository: LikeRepository) {}
 
   async like(userId: number, murmurId: number) {
-    const existing = await this.likeRepo.findOne({ where: { userId, murmurId } });
-    if (existing) return { success: true };
-    const l = this.likeRepo.create({ userId, murmurId });
-    await this.likeRepo.save(l);
+    await this.likeRepository.like(userId, murmurId);
     return { success: true };
   }
 
   async unlike(userId: number, murmurId: number) {
-    const existing = await this.likeRepo.findOne({ where: { userId, murmurId } });
-    if (!existing) return { success: true };
-    await this.likeRepo.remove(existing);
+    await this.likeRepository.unlike(userId, murmurId);
     return { success: true };
   }
 
-  async countLikes(murmurId: number) {
-    return this.likeRepo.count({ where: { murmurId } });
+  async countLikes(murmurId: number): Promise<number> {
+    return this.likeRepository.countByMurmur(murmurId);
   }
 
-  async isLikedBy(userId: number, murmurId: number) {
-    const existing = await this.likeRepo.findOne({ where: { userId, murmurId } });
-    return !!existing;
+  async isLikedBy(userId: number, murmurId: number): Promise<boolean> {
+    return this.likeRepository.isLiked(userId, murmurId);
   }
 }

@@ -8,30 +8,25 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersService = void 0;
 const common_1 = require("@nestjs/common");
-const typeorm_1 = require("@nestjs/typeorm");
-const typeorm_2 = require("typeorm");
-const user_entity_1 = require("../entities/user.entity");
-const follow_entity_1 = require("../entities/follow.entity");
+const user_repository_1 = require("../repositories/user.repository");
+const follow_repository_1 = require("../repositories/follow.repository");
 let UsersService = class UsersService {
-    constructor(userRepo, followRepo) {
-        this.userRepo = userRepo;
-        this.followRepo = followRepo;
+    constructor(userRepository, followRepository) {
+        this.userRepository = userRepository;
+        this.followRepository = followRepository;
     }
     async findAll() {
-        return this.userRepo.find();
+        return this.userRepository.findAll();
     }
     async findById(id) {
-        const user = await this.userRepo.findOne({ where: { id } });
+        const user = await this.userRepository.findById(id);
         if (!user)
             return null;
-        const followCount = await this.followRepo.count({ where: { followerId: id } });
-        const followedCount = await this.followRepo.count({ where: { followingId: id } });
+        const followCount = await this.followRepository.countFollowing(id);
+        const followedCount = await this.followRepository.countFollowers(id);
         return {
             ...user,
             followCount,
@@ -42,9 +37,7 @@ let UsersService = class UsersService {
 exports.UsersService = UsersService;
 exports.UsersService = UsersService = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
-    __param(1, (0, typeorm_1.InjectRepository)(follow_entity_1.Follow)),
-    __metadata("design:paramtypes", [typeorm_2.Repository,
-        typeorm_2.Repository])
+    __metadata("design:paramtypes", [user_repository_1.UserRepository,
+        follow_repository_1.FollowRepository])
 ], UsersService);
 //# sourceMappingURL=users.service.js.map

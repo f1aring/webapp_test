@@ -1,10 +1,17 @@
-import { Repository } from 'typeorm';
-import { User } from '../entities/user.entity';
-import { Follow } from '../entities/follow.entity';
+import { UserRepository } from '../repositories/user.repository';
+import { FollowRepository } from '../repositories/follow.repository';
 export declare class UsersService {
-    private readonly userRepo;
-    private readonly followRepo;
-    constructor(userRepo: Repository<User>, followRepo: Repository<Follow>);
-    findAll(): Promise<User[]>;
-    findById(id: number): Promise<any>;
+    private readonly userRepository;
+    private readonly followRepository;
+    constructor(userRepository: UserRepository, followRepository: FollowRepository);
+    findAll(): Promise<import("../entities/user.entity").User[]>;
+    findById(id: number): Promise<{
+        followCount: number;
+        followedCount: number;
+        id: number;
+        name: string;
+        email: string;
+        password: string;
+        isActive: boolean;
+    }>;
 }

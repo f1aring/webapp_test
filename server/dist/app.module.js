@@ -13,10 +13,10 @@ const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
 const user_entity_1 = require("./entities/user.entity");
 const murmur_entity_1 = require("./entities/murmur.entity");
-const murmurs_controller_1 = require("./murmurs/murmurs.controller");
-const murmurs_service_1 = require("./murmurs/murmurs.service");
 const follow_entity_1 = require("./entities/follow.entity");
 const like_entity_1 = require("./entities/like.entity");
+const murmurs_controller_1 = require("./murmurs/murmurs.controller");
+const murmurs_service_1 = require("./murmurs/murmurs.service");
 const follows_controller_1 = require("./follows/follows.controller");
 const follows_service_1 = require("./follows/follows.service");
 const likes_service_1 = require("./likes/likes.service");
@@ -24,6 +24,11 @@ const likes_controller_1 = require("./likes/likes.controller");
 const users_controller_1 = require("./users/users.controller");
 const users_service_1 = require("./users/users.service");
 const auth_module_1 = require("./auth/auth.module");
+const user_repository_1 = require("./repositories/user.repository");
+const murmur_repository_1 = require("./repositories/murmur.repository");
+const like_repository_1 = require("./repositories/like.repository");
+const follow_repository_1 = require("./repositories/follow.repository");
+const murmur_enricher_service_1 = require("./services/murmur-enricher.service");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -44,7 +49,18 @@ exports.AppModule = AppModule = __decorate([
             auth_module_1.AuthModule,
         ],
         controllers: [app_controller_1.AppController, murmurs_controller_1.MurmursController, follows_controller_1.FollowsController, likes_controller_1.LikesController, users_controller_1.UsersController],
-        providers: [app_service_1.AppService, murmurs_service_1.MurmursService, follows_service_1.FollowsService, likes_service_1.LikesService, users_service_1.UsersService],
+        providers: [
+            app_service_1.AppService,
+            user_repository_1.UserRepository,
+            murmur_repository_1.MurmurRepository,
+            like_repository_1.LikeRepository,
+            follow_repository_1.FollowRepository,
+            murmur_enricher_service_1.MurmurEnricherService,
+            murmurs_service_1.MurmursService,
+            follows_service_1.FollowsService,
+            likes_service_1.LikesService,
+            users_service_1.UsersService,
+        ],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map

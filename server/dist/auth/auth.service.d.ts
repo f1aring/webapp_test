@@ -1,29 +1,20 @@
-import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
-import { User } from '../entities/user.entity';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
+import { UserRepository } from '../repositories/user.repository';
 export declare class AuthService {
-    private readonly userRepo;
+    private readonly userRepository;
     private readonly jwtService;
-    constructor(userRepo: Repository<User>, jwtService: JwtService);
+    constructor(userRepository: UserRepository, jwtService: JwtService);
     signup(dto: SignupDto): Promise<{
-        user: {
-            id: number;
-            name: string;
-            email: string;
-            isActive: boolean;
-        };
+        user: any;
         token: string;
     }>;
     login(dto: LoginDto): Promise<{
-        user: {
-            id: number;
-            name: string;
-            email: string;
-            isActive: boolean;
-        };
+        user: any;
         token: string;
     }>;
-    validateUser(userId: number): Promise<User | null>;
+    validateUser(userId: number): Promise<any>;
+    private generateToken;
+    private sanitizeUser;
 }
