@@ -1,5 +1,5 @@
 import  { useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route, Link} from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import { getUsers, getCurrentUser, logout } from './api';
 import Timeline from './pages/Timeline';
 import Profile from './pages/Profile';
@@ -57,13 +57,14 @@ function App() {
         <TopBar currentUser={currentUser} onLogout={handleLogout} />
 
         <div style={{ display: 'flex', flex: 1 }}>
-        <nav style={{
-          minWidth: 220,
-          backgroundColor: 'white',
-          borderRight: '1px solid #e1e8ed',
-          padding: '20px',
-        }}>
-          {currentUser && (
+        {/* Sidebar only when a user is authenticated */}
+        {currentUser && (
+          <nav style={{
+            minWidth: 220,
+            backgroundColor: 'white',
+            borderRight: '1px solid #e1e8ed',
+            padding: '20px',
+          }}>
             <div style={{ marginBottom: '24px' }}>
               <Link 
                 to="/" 
@@ -93,37 +94,37 @@ function App() {
                 Global
               </Link>
             </div>
-          )}
 
-          <div style={{ marginBottom: '24px' }}>
-            <h4 style={{ 
-              fontSize: '14px', 
-              fontWeight: 'bold',
-              color: '#657786',
-              marginBottom: '12px',
-              textTransform: 'uppercase',
-            }}>
-              Users
-            </h4>
-            {users.map(u => (
-              <div key={u.id} style={{ marginBottom: '4px' }}>
-                <Link 
-                  to={`/users/${u.id}`}
-                  style={{
-                    display: 'block',
-                    padding: '8px',
-                    borderRadius: '4px',
-                    textDecoration: 'none',
-                    color: '#14171a',
-                    fontSize: '14px',
-                  }}
-                >
-                  {u.name || u.email}
-                </Link>
-              </div>
-            ))}
-          </div>
-        </nav>
+            <div style={{ marginBottom: '24px' }}>
+              <h4 style={{ 
+                fontSize: '14px', 
+                fontWeight: 'bold',
+                color: '#657786',
+                marginBottom: '12px',
+                textTransform: 'uppercase',
+              }}>
+                Users
+              </h4>
+              {users.map(u => (
+                <div key={u.id} style={{ marginBottom: '4px' }}>
+                  <Link 
+                    to={`/users/${u.id}`}
+                    style={{
+                      display: 'block',
+                      padding: '8px',
+                      borderRadius: '4px',
+                      textDecoration: 'none',
+                      color: '#14171a',
+                      fontSize: '14px',
+                    }}
+                  >
+                    {u.name || u.email}
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </nav>
+        )}
 
         <main style={{
           flex: 1,
@@ -139,7 +140,7 @@ function App() {
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
-              <Route path="/" element={<Timeline currentUserId={currentUser?.id} />} />
+              <Route path="/" element={currentUser ? <Timeline currentUserId={currentUser?.id} /> : <Navigate to="/login" replace />} />
               <Route path="/global" element={<Timeline currentUserId={currentUser?.id} global />} />
               <Route path="/users/:id" element={<Profile currentUserId={currentUser?.id} />} />
               <Route path="/murmurs/:id" element={<MurmurDetail currentUserId={currentUser?.id} />} />
