@@ -12,6 +12,8 @@ import { FollowsController } from './follows/follows.controller';
 import { FollowsService } from './follows/follows.service';
 import { LikesService } from './likes/likes.service';
 import { LikesController } from './likes/likes.controller';
+import { UsersController } from './users/users.controller';
+import { UsersService } from './users/users.service';
 
 @Module({
   imports: [
@@ -27,7 +29,7 @@ import { LikesController } from './likes/likes.controller';
     }),
     TypeOrmModule.forFeature([User, Murmur, Follow, Like]),
   ],
-  controllers: [AppController, MurmursController, FollowsController, LikesController],
-  providers: [AppService, MurmursService, FollowsService, LikesService],
+  controllers: [AppController, MurmursController, FollowsController, LikesController, UsersController],
+  providers: [AppService, MurmursService, FollowsService, LikesService, UsersService],
 })
 export class AppModule {}
