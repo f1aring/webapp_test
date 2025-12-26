@@ -5,9 +5,57 @@ const api = axios.create({
   timeout: 10000,
 });
 
-export function setUserId(userId?: number) {
-  if (userId) api.defaults.headers.common['x-user-id'] = String(userId);
-  else delete api.defaults.headers.common['x-user-id'];
+// Get token from localStorage
+function getToken(): string | null {
+  return localStorage.getItem('token');
+}
+
+// Set token in axios headers
+export function setToken(token: string | null) {
+  if (token) {
+    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    localStorage.setItem('token', token);
+  } else {
+    delete api.defaults.headers.common['Authorization'];
+    localStorage.removeItem('token');
+  }
+}
+
+// Initialize token on load
+const token = getToken();
+if (token) {
+  setToken(token);
+}
+
+// Legacy support - keep for backward compatibility
+export function setUserId(_userId?: number) {
+  // This is now handled by JWT token
+  // Keeping for backward compatibility
+}
+
+// Auth endpoints
+export async function signup(name: string, email: string, password: string) {
+  const response = await api.post('/auth/signup', { name, email, password });
+  if (response.data.token) {
+    setToken(response.data.token);
+  }
+  return response.data;
+}
+
+export async function login(email: string, password: string) {
+  const response = await api.post('/auth/login', { email, password });
+  if (response.data.token) {
+    setToken(response.data.token);
+  }
+  return response.data;
+}
+
+export async function logout() {
+  setToken(null);
+}
+
+export async function getCurrentUser() {
+  return api.get('/auth/me').then(r => r.data);
 }
 
 export async function getUsers() {

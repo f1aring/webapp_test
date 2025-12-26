@@ -8,8 +8,11 @@ export class User {
   @Column()
   name!: string;
 
-  @Column()
+  @Column({ unique: true })
   email!: string;
+
+  @Column()
+  password!: string;
 
   @Column({ default: true })
   isActive!: boolean;

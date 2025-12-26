@@ -15,52 +15,50 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.FollowsController = void 0;
 const common_1 = require("@nestjs/common");
 const follows_service_1 = require("./follows.service");
+const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 let FollowsController = class FollowsController {
     constructor(followsService) {
         this.followsService = followsService;
     }
-    checkFollow(xUserId, id) {
-        const userId = xUserId ? Number(xUserId) : undefined;
-        if (!userId)
-            return { error: 'Missing x-user-id header' };
+    checkFollow(req, id) {
+        const userId = req.user.id;
         return this.followsService.isFollowing(userId, Number(id));
     }
-    follow(xUserId, id) {
-        const userId = xUserId ? Number(xUserId) : undefined;
-        if (!userId)
-            return { error: 'Missing x-user-id header' };
+    follow(req, id) {
+        const userId = req.user.id;
         return this.followsService.follow(userId, Number(id));
     }
-    unfollow(xUserId, id) {
-        const userId = xUserId ? Number(xUserId) : undefined;
-        if (!userId)
-            return { error: 'Missing x-user-id header' };
+    unfollow(req, id) {
+        const userId = req.user.id;
         return this.followsService.unfollow(userId, Number(id));
     }
 };
 exports.FollowsController = FollowsController;
 __decorate([
     (0, common_1.Get)('me/follow/:id'),
-    __param(0, (0, common_1.Headers)('x-user-id')),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], FollowsController.prototype, "checkFollow", null);
 __decorate([
     (0, common_1.Post)('me/follow/:id'),
-    __param(0, (0, common_1.Headers)('x-user-id')),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], FollowsController.prototype, "follow", null);
 __decorate([
     (0, common_1.Delete)('me/follow/:id'),
-    __param(0, (0, common_1.Headers)('x-user-id')),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], FollowsController.prototype, "unfollow", null);
 exports.FollowsController = FollowsController = __decorate([

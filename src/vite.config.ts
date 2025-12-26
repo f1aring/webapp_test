@@ -10,18 +10,15 @@ export default defineConfig({
         target: 'http://localhost:3001',
         changeOrigin: true,
         secure: false,
-        configure: (proxy, _options) => {
-          proxy.on('proxyReq', (proxyReq, req, _res) => {
-            // Don't proxy requests for module files
-            if (req.url && /\.(tsx?|jsx?|json|css|html|ico)$/i.test(req.url)) {
-              proxyReq.destroy();
-            }
-          });
-        },
-        bypass(req, res, options) {
-          // Don't proxy requests for TypeScript/JavaScript/module files
-          if (req.url && /\.(tsx?|jsx?|json|css|html|ico)$/i.test(req.url)) {
-            return req.url;
+        bypass(req) {
+          // Don't proxy if the URL ends with a file extension (module files)
+          const url = req.url || '';
+          if (/\.(tsx?|jsx?|json|css|html|ico|svg|png|jpg|jpeg|gif|woff|woff2|ttf|eot|map)$/i.test(url)) {
+            return url;
+          }
+          // Don't proxy if it's a query parameter request for a module (like ?t=timestamp)
+          if (url.includes('?t=') && /\.(tsx?|jsx?)$/i.test(url.split('?')[0])) {
+            return url;
           }
         }
       }

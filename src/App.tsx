@@ -1,26 +1,37 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
-import { setUserId, getUsers } from './api';
+import { BrowserRouter, Routes, Route, Link, Navigate } from 'react-router-dom';
+import { getUsers, getCurrentUser, logout } from './api';
 import Timeline from './pages/Timeline';
 import Profile from './pages/Profile';
 import MurmurDetail from './pages/MurmurDetail';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
 import { User } from './types';
 import './index.css';
 
 function App() {
-  const [userId, setId] = useState<number | undefined>(() => {
-    const raw = localStorage.getItem('currentUserId');
-    return raw ? Number(raw) : undefined;
-  });
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setUserId(userId);
-    if (userId) localStorage.setItem('currentUserId', String(userId));
-    else localStorage.removeItem('currentUserId');
-  }, [userId]);
+    // Check if user is authenticated
+    const checkAuth = async () => {
+      try {
+        const user = await getCurrentUser();
+        setCurrentUser(user);
+      } catch (error) {
+        setCurrentUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
 
   useEffect(() => {
+    // Load all users for navigation
     getUsers()
       .then(setUsers)
       .catch((error) => {
@@ -28,6 +39,11 @@ function App() {
         setUsers([]);
       });
   }, []);
+
+  const handleLogout = () => {
+    logout();
+    setCurrentUser(null);
+  };
 
   return (
     <BrowserRouter>
@@ -110,50 +126,103 @@ function App() {
             ))}
           </div>
 
-          <div style={{ 
-            marginTop: '24px',
-            padding: '16px',
-            backgroundColor: '#f7f9fa',
-            borderRadius: '8px',
-          }}>
-            <label style={{ 
-              display: 'block',
-              fontSize: '14px',
-              fontWeight: 'bold',
-              color: '#657786',
-              marginBottom: '8px',
+          {currentUser ? (
+            <div style={{ 
+              marginTop: '24px',
+              padding: '16px',
+              backgroundColor: '#f7f9fa',
+              borderRadius: '8px',
             }}>
-              Current User
-            </label>
-            <select 
-              value={userId ?? ''} 
-              onChange={e => setId(e.target.value ? Number(e.target.value) : undefined)}
-              style={{
-                width: '100%',
-                padding: '8px',
-                borderRadius: '4px',
-                border: '1px solid #e1e8ed',
-                fontSize: '14px',
-                backgroundColor: 'white',
-              }}
-            >
-              <option value="">(none)</option>
-              {users.map(u => (
-                <option key={u.id} value={u.id}>
-                  {u.name || u.email}
-                </option>
-              ))}
-            </select>
-            {userId && (
-              <p style={{ 
-                marginTop: '8px',
-                fontSize: '12px',
-                color: '#657786',
-              }}>
-                You are logged in as: {users.find(u => u.id === userId)?.name || users.find(u => u.id === userId)?.email}
-              </p>
-            )}
-          </div>
+              <div style={{ marginBottom: '12px' }}>
+                <p style={{ 
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  color: '#14171a',
+                  marginBottom: '4px',
+                }}>
+                  {currentUser.name || currentUser.email}
+                </p>
+                <p style={{ 
+                  fontSize: '12px',
+                  color: '#657786',
+                }}>
+                  @user{currentUser.id}
+                </p>
+              </div>
+              <Link
+                to={`/users/${currentUser.id}`}
+                style={{
+                  display: 'block',
+                  padding: '8px',
+                  borderRadius: '4px',
+                  textDecoration: 'none',
+                  color: '#1da1f2',
+                  fontSize: '14px',
+                  marginBottom: '8px',
+                  textAlign: 'center',
+                }}
+              >
+                My Profile
+              </Link>
+              <button
+                onClick={handleLogout}
+                style={{
+                  width: '100%',
+                  padding: '8px',
+                  border: '1px solid #e1e8ed',
+                  borderRadius: '4px',
+                  backgroundColor: 'white',
+                  color: '#e0245e',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                }}
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <div style={{ 
+              marginTop: '24px',
+              padding: '16px',
+              backgroundColor: '#f7f9fa',
+              borderRadius: '8px',
+            }}>
+              <Link
+                to="/login"
+                style={{
+                  display: 'block',
+                  padding: '10px',
+                  borderRadius: '4px',
+                  textDecoration: 'none',
+                  backgroundColor: '#1da1f2',
+                  color: 'white',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  textAlign: 'center',
+                  marginBottom: '8px',
+                }}
+              >
+                Sign In
+              </Link>
+              <Link
+                to="/signup"
+                style={{
+                  display: 'block',
+                  padding: '10px',
+                  borderRadius: '4px',
+                  textDecoration: 'none',
+                  border: '1px solid #1da1f2',
+                  color: '#1da1f2',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  textAlign: 'center',
+                  backgroundColor: 'white',
+                }}
+              >
+                Sign Up
+              </Link>
+            </div>
+          )}
         </nav>
 
         <main style={{ 
@@ -162,12 +231,20 @@ function App() {
           maxWidth: '600px',
           margin: '0 auto',
         }}>
-          <Routes>
-            <Route path="/" element={<Timeline currentUserId={userId} />} />
-            <Route path="/global" element={<Timeline currentUserId={userId} global />} />
-            <Route path="/users/:id" element={<Profile currentUserId={userId} />} />
-            <Route path="/murmurs/:id" element={<MurmurDetail currentUserId={userId} />} />
-          </Routes>
+          {loading ? (
+            <div style={{ padding: '40px', textAlign: 'center', color: '#657786' }}>
+              Loading...
+            </div>
+          ) : (
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/" element={<Timeline currentUserId={currentUser?.id} />} />
+              <Route path="/global" element={<Timeline currentUserId={currentUser?.id} global />} />
+              <Route path="/users/:id" element={<Profile currentUserId={currentUser?.id} />} />
+              <Route path="/murmurs/:id" element={<MurmurDetail currentUserId={currentUser?.id} />} />
+            </Routes>
+          )}
         </main>
       </div>
     </BrowserRouter>
