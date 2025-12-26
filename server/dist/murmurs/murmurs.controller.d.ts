@@ -6,11 +6,11 @@ export declare class MurmursController {
     private readonly followsService;
     constructor(murmursService: MurmursService, followsService: FollowsService);
     private getUserId;
-    getAll(req: any, xUserId: string | undefined): Promise<any[]>;
-    getOne(id: number, req: any, xUserId: string | undefined): Promise<any>;
-    getByUser(id: string, req: any, xUserId: string | undefined): Promise<any[]>;
-    timeline(req: any): Promise<any[]>;
-    createForMe(req: any, body: CreateMurmurDto): Promise<any>;
+    getAll(req: any, xUserId: string | undefined): Promise<import("../services/murmur-enricher.service").EnrichedMurmur[]>;
+    getOne(id: number, req: any, xUserId: string | undefined): Promise<import("../services/murmur-enricher.service").EnrichedMurmur>;
+    getByUser(id: string, req: any, xUserId: string | undefined): Promise<import("../services/murmur-enricher.service").EnrichedMurmur[]>;
+    timeline(req: any): Promise<import("../services/murmur-enricher.service").EnrichedMurmur[]>;
+    createForMe(req: any, body: CreateMurmurDto): Promise<import("../services/murmur-enricher.service").EnrichedMurmur>;
     deleteForMe(req: any, id: number): Promise<{
         success: boolean;
     }>;

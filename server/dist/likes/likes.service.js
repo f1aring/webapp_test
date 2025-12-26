@@ -8,46 +8,32 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LikesService = void 0;
 const common_1 = require("@nestjs/common");
-const typeorm_1 = require("@nestjs/typeorm");
-const typeorm_2 = require("typeorm");
-const like_entity_1 = require("../entities/like.entity");
+const like_repository_1 = require("../repositories/like.repository");
 let LikesService = class LikesService {
-    constructor(likeRepo) {
-        this.likeRepo = likeRepo;
+    constructor(likeRepository) {
+        this.likeRepository = likeRepository;
     }
     async like(userId, murmurId) {
-        const existing = await this.likeRepo.findOne({ where: { userId, murmurId } });
-        if (existing)
-            return { success: true };
-        const l = this.likeRepo.create({ userId, murmurId });
-        await this.likeRepo.save(l);
+        await this.likeRepository.like(userId, murmurId);
         return { success: true };
     }
     async unlike(userId, murmurId) {
-        const existing = await this.likeRepo.findOne({ where: { userId, murmurId } });
-        if (!existing)
-            return { success: true };
-        await this.likeRepo.remove(existing);
+        await this.likeRepository.unlike(userId, murmurId);
         return { success: true };
     }
     async countLikes(murmurId) {
-        return this.likeRepo.count({ where: { murmurId } });
+        return this.likeRepository.countByMurmur(murmurId);
     }
     async isLikedBy(userId, murmurId) {
-        const existing = await this.likeRepo.findOne({ where: { userId, murmurId } });
-        return !!existing;
+        return this.likeRepository.isLiked(userId, murmurId);
     }
 };
 exports.LikesService = LikesService;
 exports.LikesService = LikesService = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, typeorm_1.InjectRepository)(like_entity_1.Like)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __metadata("design:paramtypes", [like_repository_1.LikeRepository])
 ], LikesService);
 //# sourceMappingURL=likes.service.js.map

@@ -5,10 +5,6 @@ export declare class FollowsController {
     checkFollow(req: any, id: string): Promise<boolean>;
     follow(req: any, id: string): Promise<{
         success: boolean;
-        message: string;
-    } | {
-        success: boolean;
-        message?: undefined;
     }>;
     unfollow(req: any, id: string): Promise<{
         success: boolean;

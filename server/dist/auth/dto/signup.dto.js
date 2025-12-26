@@ -15,17 +15,23 @@ class SignupDto {
 }
 exports.SignupDto = SignupDto;
 __decorate([
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MinLength)(2),
+    (0, class_validator_1.IsString)({ message: 'Name must be a string' }),
+    (0, class_validator_1.MinLength)(2, { message: 'Name must be at least 2 characters long' }),
+    (0, class_validator_1.MaxLength)(100, { message: 'Name must not exceed 100 characters' }),
     __metadata("design:type", String)
 ], SignupDto.prototype, "name", void 0);
 __decorate([
-    (0, class_validator_1.IsEmail)(),
+    (0, class_validator_1.IsEmail)({}, { message: 'Invalid email address' }),
+    (0, class_validator_1.MaxLength)(255, { message: 'Email must not exceed 255 characters' }),
     __metadata("design:type", String)
 ], SignupDto.prototype, "email", void 0);
 __decorate([
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MinLength)(6),
+    (0, class_validator_1.IsString)({ message: 'Password must be a string' }),
+    (0, class_validator_1.MinLength)(6, { message: 'Password must be at least 6 characters long' }),
+    (0, class_validator_1.MaxLength)(128, { message: 'Password must not exceed 128 characters' }),
+    (0, class_validator_1.Matches)(/(?=.*[a-z])/, { message: 'Password must contain at least one lowercase letter' }),
+    (0, class_validator_1.Matches)(/(?=.*[A-Z])/, { message: 'Password must contain at least one uppercase letter' }),
+    (0, class_validator_1.Matches)(/(?=.*\d)/, { message: 'Password must contain at least one number' }),
     __metadata("design:type", String)
 ], SignupDto.prototype, "password", void 0);
 //# sourceMappingURL=signup.dto.js.map

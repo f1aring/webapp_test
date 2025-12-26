@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route, Link, Navigate } from 'react-router-dom';
+import  { useEffect, useState } from 'react';
+import { BrowserRouter, Routes, Route, Link} from 'react-router-dom';
 import { getUsers, getCurrentUser, logout } from './api';
 import Timeline from './pages/Timeline';
 import Profile from './pages/Profile';

@@ -1,89 +1,70 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
-import { Murmur } from '../entities/murmur.entity';
-import { User } from '../entities/user.entity';
-import { Like } from '../entities/like.entity';
+import { Injectable } from '@nestjs/common';
+import { In } from 'typeorm';
 import { CreateMurmurDto } from './dto/create-murmur.dto';
+import { MurmurRepository } from '../repositories/murmur.repository';
+import { UserRepository } from '../repositories/user.repository';
+import { MurmurEnricherService } from '../services/murmur-enricher.service';
+import { ResourceNotFoundException, ForbiddenException } from '../common/exceptions/business.exception';
+import { User } from '../entities/user.entity';
 
 @Injectable()
 export class MurmursService {
   constructor(
-    @InjectRepository(Murmur)
-    private readonly murmurRepo: Repository<Murmur>,
-    @InjectRepository(User)
-    private readonly userRepo: Repository<User>,
-    @InjectRepository(Like)
-    private readonly likeRepo: Repository<Like>,
+    private readonly murmurRepository: MurmurRepository,
+    private readonly userRepository: UserRepository,
+    private readonly enricherService: MurmurEnricherService,
   ) {}
 
-  private async enrichMurmurs(murmurs: Murmur[], currentUserId?: number): Promise<any[]> {
-    const userIds = [...new Set(murmurs.map(m => m.userId))];
-    const users = await this.userRepo.find({ where: { id: In(userIds) } });
-    const userMap = new Map(users.map(u => [u.id, u]));
-
-    const murmurIds = murmurs.map(m => m.id);
-    const likes = murmurIds.length > 0 
-      ? await this.likeRepo.find({ where: { murmurId: In(murmurIds) } })
-      : [];
+  async findById(id: number, currentUserId?: number) {
+    const murmur = await this.murmurRepository.findById(id);
+    if (!murmur) throw new ResourceNotFoundException('Murmur');
     
-    const likeCounts = new Map<number, number>();
-    const userLikes = new Map<number, Set<number>>(); // murmurId -> Set of userIds
-
-    likes.forEach(like => {
-      likeCounts.set(like.murmurId, (likeCounts.get(like.murmurId) || 0) + 1);
-      if (!userLikes.has(like.murmurId)) {
-        userLikes.set(like.murmurId, new Set());
-      }
-      userLikes.get(like.murmurId)!.add(like.userId);
-    });
-
-    return murmurs.map(murmur => ({
-      ...murmur,
-      user: userMap.get(murmur.userId),
-      likeCount: likeCounts.get(murmur.id) || 0,
-      isLiked: currentUserId ? userLikes.get(murmur.id)?.has(currentUserId) : false,
-    }));
-  }
-
-  async findById(id: number, currentUserId?: number): Promise<any> {
-    const murmur = await this.murmurRepo.findOne({ where: { id } });
-    if (!murmur) throw new NotFoundException('Murmur not found');
-    const enriched = await this.enrichMurmurs([murmur], currentUserId);
+    const userMap = await this.buildUserMapTyped([murmur.userId]);
+    const enriched = await this.enricherService.enrichMurmurs([murmur], userMap, currentUserId);
     return enriched[0];
   }
 
-  async findAll(currentUserId?: number): Promise<any[]> {
-    const murmurs = await this.murmurRepo.find({ order: { createdAt: 'DESC' } });
-    return this.enrichMurmurs(murmurs, currentUserId);
+  async findAll(currentUserId?: number) {
+    const murmurs = await this.murmurRepository.findAll();
+    const userMap = await this.buildUserMapTyped([...new Set(murmurs.map(m => m.userId))]);
+    return this.enricherService.enrichMurmurs(murmurs, userMap, currentUserId);
   }
 
-  async findByUser(userId: number, currentUserId?: number): Promise<any[]> {
-    const murmurs = await this.murmurRepo.find({ where: { userId }, order: { createdAt: 'DESC' } });
-    return this.enrichMurmurs(murmurs, currentUserId);
+  async findByUser(userId: number, currentUserId?: number) {
+    const murmurs = await this.murmurRepository.findByUserId(userId);
+    const userMap = await this.buildUserMapTyped([userId]);
+    return this.enricherService.enrichMurmurs(murmurs, userMap, currentUserId);
   }
 
-  async findByUsers(userIds: number[], currentUserId?: number, limit = 100): Promise<any[]> {
-    if (!userIds || userIds.length === 0) return Promise.resolve([]);
-    const murmurs = await this.murmurRepo.find({ 
-      where: { userId: In(userIds) }, 
-      order: { createdAt: 'DESC' }, 
-      take: limit 
-    });
-    return this.enrichMurmurs(murmurs, currentUserId);
+  async findByUsers(userIds: number[], currentUserId?: number, limit = 100) {
+    const murmurs = await this.murmurRepository.findByUserIds(userIds, limit);
+    const userMap = await this.buildUserMapTyped(userIds);
+    return this.enricherService.enrichMurmurs(murmurs, userMap, currentUserId);
   }
 
   async createForUser(userId: number, dto: CreateMurmurDto) {
-    const murmur = this.murmurRepo.create({ userId, content: dto.content });
-    const saved = await this.murmurRepo.save(murmur);
-    return this.enrichMurmurs([saved], userId).then(arr => arr[0]);
+    const murmur = await this.murmurRepository.create({ userId, content: dto.content });
+    const userMap = await this.buildUserMapTyped([userId]);
+    const enriched = await this.enricherService.enrichMurmurs([murmur], userMap, userId);
+    return enriched[0];
   }
 
   async deleteForUser(userId: number, id: number) {
-    const murmur = await this.murmurRepo.findOne({ where: { id } });
-    if (!murmur) throw new NotFoundException('Murmur not found');
-    if (murmur.userId !== userId) throw new ForbiddenException();
-    await this.murmurRepo.remove(murmur);
+    const murmur = await this.murmurRepository.findById(id);
+    if (!murmur) throw new ResourceNotFoundException('Murmur');
+    if (murmur.userId !== userId) throw new ForbiddenException('Cannot delete another user\'s murmur');
+    
+    await this.murmurRepository.delete(id);
     return { success: true };
+  }
+
+
+  private async buildUserMapTyped(userIds: number[]): Promise<Map<number, User>> {
+    const uniqueIds = [...new Set(userIds)];
+    const users = await Promise.all(
+      uniqueIds.map(id => this.userRepository.findById(id)),
+    );
+    const filtered = users.filter((u): u is User => u !== null);
+    return new Map(filtered.map(u => [u.id, u]));
   }
 }
