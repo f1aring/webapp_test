@@ -1,8 +1,7 @@
-import { Repository } from 'typeorm';
-import { Like } from '../entities/like.entity';
+import { LikeRepository } from '../repositories/like.repository';
 export declare class LikesService {
-    private readonly likeRepo;
-    constructor(likeRepo: Repository<Like>);
+    private readonly likeRepository;
+    constructor(likeRepository: LikeRepository);
     like(userId: number, murmurId: number): Promise<{
         success: boolean;
     }>;
